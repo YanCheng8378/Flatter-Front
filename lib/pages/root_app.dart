@@ -1,3 +1,4 @@
+import 'package:fitness_ui_kit/pages/data_chart_page.dart';
 import 'package:fitness_ui_kit/pages/home_page.dart';
 import 'package:fitness_ui_kit/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -26,30 +27,26 @@ class _RootAppState extends State<RootApp> {
     );
   }
 
-  // 1) 在 IndexedStack 中放置 5 个页面
-  //    第 3 个是蓝牙页面，第 4 个是数据展示页面，第 5 个是个人页面
   Widget getBody() {
     return IndexedStack(
       index: pageIndex,
       children: [
         HomePage(),
-        Center(child: Text("Chart")),
-        BluetoothDevicesPage(), // 用蓝牙设备页面替换 Camera
-        DataDisplayPage(),      // 新增数据展示页面
+        DataDisplayPage(),
+        DataChartPage(),
+        BluetoothDevicesPage(),
         Center(child: Text("Profile")),
       ],
     );
   }
 
-  // 2) 更新底部导航栏图标和数量
-  //    [Home, Chart, Bluetooth, Data, User]
   Widget getFooter() {
     List items = [
-      LineIcons.home,        // 首页
-      LineIcons.pieChart,    // 图表
-      Icons.bluetooth,       // 蓝牙
-      Icons.data_usage,      // 数据
-      LineIcons.user         // 用户/个人中心
+      LineIcons.home,
+      Icons.data_usage,
+      LineIcons.pieChart,
+      Icons.bluetooth,
+      LineIcons.user
     ];
     return Container(
       height: 90,

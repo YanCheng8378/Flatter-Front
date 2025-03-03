@@ -9,20 +9,30 @@ class BluetoothService {
 
   final fb.FlutterBluePlus fbp = fb.FlutterBluePlus();
   fb.BluetoothDevice? _connectedDevice;
-  fb.BluetoothCharacteristic? _targetCharacteristic;
 
+  // Define separate variables for each target characteristic.
+  fb.BluetoothCharacteristic? _predictionCharacteristic;
+  fb.BluetoothCharacteristic? _sensorCharacteristic;
+
+  // Create separate StreamControllers if you want to handle the data separately.
   final StreamController<List<fb.BluetoothDevice>> _bondedDevicesController =
   StreamController<List<fb.BluetoothDevice>>.broadcast();
   final StreamController<List<fb.ScanResult>> _scanResultsController =
   StreamController<List<fb.ScanResult>>.broadcast();
-  final StreamController<String> _dataController =
-  StreamController<String>.broadcast();
 
+  // Separate controllers for prediction and sensor data.
+  final StreamController<List<int>> _predictionDataController =
+  StreamController<List<int>>.broadcast();
+  final StreamController<List<int>> _sensorDataController =
+  StreamController<List<int>>.broadcast();
+
+  // Expose streams for external listeners.
   Stream<List<fb.BluetoothDevice>> get bondedDevicesStream =>
       _bondedDevicesController.stream;
   Stream<List<fb.ScanResult>> get scanResultsStream =>
       _scanResultsController.stream;
-  Stream<String> get dataStream => _dataController.stream;
+  Stream<List<int>> get predictionDataStream => _predictionDataController.stream;
+  Stream<List<int>> get sensorDataStream => _sensorDataController.stream;
 
   /// Initializes Bluetooth service.
   void initialize() {
@@ -57,7 +67,7 @@ class BluetoothService {
     });
   }
 
-  /// Connects to a selected bonded or scanned device.
+  /// Connects to a selected device and discovers its services.
   Future<void> connectToDevice(fb.BluetoothDevice device) async {
     try {
       await device.connect();
@@ -69,54 +79,61 @@ class BluetoothService {
     }
   }
 
-  /// Discovers services and characteristics of the connected device.
+  /// Discovers services and subscribes to notifications for two specific characteristics.
   Future<void> discoverServices(fb.BluetoothDevice device) async {
     List<fb.BluetoothService> services = await device.discoverServices();
     for (fb.BluetoothService service in services) {
       for (fb.BluetoothCharacteristic characteristic in service.characteristics) {
         print("Discovered Characteristic: ${characteristic.uuid}");
-        // 仅示例使用特定的 UUID（如 "2a37"），请根据你的设备实际情况修改
-        if (characteristic.uuid.toString().toLowerCase() == "2a37") {
-          _targetCharacteristic = characteristic;
-          readCharacteristic(characteristic); // 读取一次
-          monitorCharacteristic(characteristic); // 开启通知，实时更新
-          return;
+        // Check for the prediction characteristic UUID.
+        if (characteristic.uuid.toString().toLowerCase() ==
+            "19b10012-e8f2-537e-4f6c-d104768a1214") {
+          _predictionCharacteristic = characteristic;
+          readCharacteristic(characteristic);
+          monitorCharacteristic(characteristic, _predictionDataController);
+        }
+        // Check for the sensor data characteristic UUID.
+        else if (characteristic.uuid.toString().toLowerCase() ==
+            "19b10013-e8f2-537e-4f6c-d104768a1215") {
+          _sensorCharacteristic = characteristic;
+          readCharacteristic(characteristic);
+          monitorCharacteristic(characteristic, _sensorDataController);
         }
       }
     }
   }
 
-  /// Reads data from the target characteristic.
+  /// Reads data from a characteristic.
   Future<void> readCharacteristic(fb.BluetoothCharacteristic characteristic) async {
     try {
       List<int> value = await characteristic.read();
       String data = utf8.decode(value);
-      print("Read Data: $data");
-      _dataController.add(data);
+      print("Read Data from ${characteristic.uuid}: $data");
+      // Here you might add the value to the corresponding stream if needed.
     } catch (e) {
       print("Error reading characteristic: $e");
     }
   }
 
-  /// Subscribes to characteristic notifications.
-  void monitorCharacteristic(fb.BluetoothCharacteristic characteristic) async {
+  /// Subscribes to characteristic notifications and directs the data to the provided controller.
+  void monitorCharacteristic(
+      fb.BluetoothCharacteristic characteristic, StreamController<List<int>> controller) async {
     if (characteristic.properties.notify) {
       await characteristic.setNotifyValue(true);
       characteristic.lastValueStream.listen((value) {
-        String data = value.isNotEmpty ? value.toString() : "No Data";
-        print("Received Data: $data");
-        _dataController.add(data);
+        controller.add(value); // Send the received data to the appropriate stream.
       });
     }
   }
 
-  /// Disconnects from the device.
+  /// Disconnects from the connected device.
   Future<void> disconnectDevice() async {
     if (_connectedDevice != null) {
       await _connectedDevice!.disconnect();
       print("Disconnected from device: ${_connectedDevice!.platformName}");
       _connectedDevice = null;
-      _targetCharacteristic = null;
+      _predictionCharacteristic = null;
+      _sensorCharacteristic = null;
     }
   }
 
@@ -127,6 +144,7 @@ class BluetoothService {
   void dispose() {
     _bondedDevicesController.close();
     _scanResultsController.close();
-    _dataController.close();
+    _predictionDataController.close();
+    _sensorDataController.close();
   }
 }
