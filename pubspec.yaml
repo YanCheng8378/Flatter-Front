@@ -30,11 +30,13 @@ dependencies:
   flutter_svg: ^2.0.7
   video_player: ^2.5.1
   flutter_blue_plus: ^1.0.0
+  permission_handler: ^11.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.2.10
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -51,6 +53,7 @@ flutter:
   assets:
     - assets/images/
     - assets/gifs/
+    - assets/logo/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -78,3 +81,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_native_splash:
+  color: "#ffffff"
+  image: "assets/logo/Logo.png"
+  android: true
+  ios: true
+  android_gravity: center                 # 图片在 Android 上居中
+  ios_content_mode: scaleAspectFit        # 图片在 iOS 上等比缩放居中

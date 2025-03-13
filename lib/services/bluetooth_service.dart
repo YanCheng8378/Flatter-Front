@@ -1,6 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fb;
+
+enum ConnectionState {
+  disconnected,
+  connecting,
+  connected
+}
 
 class BluetoothService {
   static final BluetoothService _instance = BluetoothService._internal();
@@ -25,6 +32,8 @@ class BluetoothService {
   StreamController<List<int>>.broadcast();
   final StreamController<List<int>> _sensorDataController =
   StreamController<List<int>>.broadcast();
+  final StreamController<ConnectionState> _connectionStateController =
+  StreamController<ConnectionState>.broadcast();
 
   // Expose streams for external listeners.
   Stream<List<fb.BluetoothDevice>> get bondedDevicesStream =>
@@ -33,6 +42,14 @@ class BluetoothService {
       _scanResultsController.stream;
   Stream<List<int>> get predictionDataStream => _predictionDataController.stream;
   Stream<List<int>> get sensorDataStream => _sensorDataController.stream;
+  Stream<ConnectionState> get connectionStateStream =>
+      _connectionStateController.stream;
+
+  bool _isPredictionSubscribed = false;
+  bool _isSensorSubscribed = false;
+
+  // 添加一个综合订阅状态
+  bool get isSubscribed => _isPredictionSubscribed && _isSensorSubscribed;
 
   /// Initializes Bluetooth service.
   void initialize() {
@@ -68,14 +85,26 @@ class BluetoothService {
   }
 
   /// Connects to a selected device and discovers its services.
+  // Future<void> connectToDevice(fb.BluetoothDevice device) async {
+  //   try {
+  //     await device.connect();
+  //     _connectedDevice = device;
+  //     print("Connected to device: ${device.platformName}");
+  //     discoverServices(device);
+  //   } catch (e) {
+  //     print("Error connecting to device: $e");
+  //   }
+  // }
   Future<void> connectToDevice(fb.BluetoothDevice device) async {
     try {
+      _connectionStateController.add(ConnectionState.connecting);
       await device.connect();
       _connectedDevice = device;
-      print("Connected to device: ${device.platformName}");
+      _connectionStateController.add(ConnectionState.connected);
       discoverServices(device);
     } catch (e) {
-      print("Error connecting to device: $e");
+      _connectionStateController.add(ConnectionState.disconnected);
+      print("连接失败: $e");
     }
   }
 
@@ -116,13 +145,38 @@ class BluetoothService {
   }
 
   /// Subscribes to characteristic notifications and directs the data to the provided controller.
+  // void monitorCharacteristic(
+  //     fb.BluetoothCharacteristic characteristic, StreamController<List<int>> controller) async {
+  //   if (characteristic.properties.notify) {
+  //     await characteristic.setNotifyValue(true);
+  //     characteristic.lastValueStream.listen((value) {
+  //       controller.add(value); // Send the received data to the appropriate stream.
+  //     });
+  //   }
+  // }
   void monitorCharacteristic(
-      fb.BluetoothCharacteristic characteristic, StreamController<List<int>> controller) async {
-    if (characteristic.properties.notify) {
-      await characteristic.setNotifyValue(true);
-      characteristic.lastValueStream.listen((value) {
-        controller.add(value); // Send the received data to the appropriate stream.
-      });
+      fb.BluetoothCharacteristic characteristic,
+      StreamController<List<int>> controller) async {
+    try {
+      if (characteristic.properties.notify) {
+        await characteristic.setNotifyValue(true);
+
+        // 根据特征值类型更新订阅状态
+        if (characteristic == _predictionCharacteristic) {
+          _isPredictionSubscribed = true;
+        } else if (characteristic == _sensorCharacteristic) {
+          _isSensorSubscribed = true;
+        }
+
+        characteristic.lastValueStream.listen((value) {
+          controller.add(value);
+        });
+      }
+    } catch (e) {
+      print("订阅特征值失败: $e");
+      // 重置订阅状态（可选）
+      _isPredictionSubscribed = false;
+      _isSensorSubscribed = false;
     }
   }
 

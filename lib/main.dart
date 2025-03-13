@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_ui_kit/pages/login_page.dart';
+import 'package:fitness_ui_kit/pages/bluetooth_devices_page.dart';
 import 'router.dart' as router;
 
 class MyApp extends StatelessWidget {
@@ -9,7 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: BluetoothDevicesPage(),
       onGenerateRoute: router.generateRoute,
     );
   }

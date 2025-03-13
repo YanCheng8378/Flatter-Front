@@ -34,7 +34,7 @@ class _RootAppState extends State<RootApp> {
         HomePage(),
         DataDisplayPage(),
         DataChartPage(),
-        BluetoothDevicesPage(),
+        // BluetoothDevicesPage(),
         Center(child: Text("Profile")),
       ],
     );
@@ -45,7 +45,7 @@ class _RootAppState extends State<RootApp> {
       LineIcons.home,
       Icons.data_usage,
       LineIcons.pieChart,
-      Icons.bluetooth,
+      // Icons.bluetooth,
       LineIcons.user
     ];
     return Container(
