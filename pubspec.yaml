@@ -36,7 +36,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  flutter_native_splash: ^2.2.10
+  flutter_native_splash: ^2.3.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -82,9 +82,9 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 flutter_native_splash:
-  color: "#ffffff"
-  image: "assets/logo/Logo.png"
-  android: true
-  ios: true
-  android_gravity: center                 # 图片在 Android 上居中
-  ios_content_mode: scaleAspectFit        # 图片在 iOS 上等比缩放居中
+    color: "000000"  # 注意必须是8位HEX (包含透明度)
+    image: "assets/logo/img.png"  # 确保路径正确
+    android: true
+    ios: true
+    android_gravity: center
+    ios_content_mode: center

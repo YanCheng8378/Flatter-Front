@@ -138,79 +138,78 @@ class BluetoothDevicesPage extends StatefulWidget {
 class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
   final myService.BluetoothService _bluetoothService = myService.BluetoothService();
 
-  // 你想要默认连接的目标设备名称
+  // The default target device name you want to connect to
   static const String _targetDeviceName = "Nano33BLE_Predictor";
 
-  fb.BluetoothDevice? _selectedDevice;  // 找到的已绑定设备
+  fb.BluetoothDevice? _selectedDevice;  // The bonded device if found
   bool _isConnecting = false;
   myService.ConnectionState _connectionState = myService.ConnectionState.disconnected;
 
   late StreamSubscription<myService.ConnectionState> _connectionSubscription;
-  StreamSubscription<List<fb.BluetoothDevice>>? _bondedSubscription; // 监听已绑定设备
+  StreamSubscription<List<fb.BluetoothDevice>>? _bondedSubscription; // Listen to bonded devices
 
   @override
   void initState() {
     super.initState();
 
-    // 初始化蓝牙服务
+    // Initialize the Bluetooth service
     _bluetoothService.initialize();
 
-    // 监听连接状态
+    // Listen to the connection state
     _connectionSubscription = _bluetoothService.connectionStateStream.listen((state) {
       setState(() {
         _connectionState = state;
       });
     });
 
-    // 监听已绑定设备列表，一旦获取到列表，就检查是否包含目标设备
-    // 注意：_bluetoothService.bondedDevicesStream 需要你在 BluetoothService 中有相应的实现
+    // Listen to the bonded device list; once received, check if it contains the target device
+    // Note: _bluetoothService.bondedDevicesStream needs to be properly implemented in your BluetoothService
     _bondedSubscription = _bluetoothService.bondedDevicesStream.listen((bondedDevices) {
-      // 尝试在已绑定设备中找到目标设备
       for (final device in bondedDevices) {
         if (device.platformName == _targetDeviceName) {
           setState(() {
             _selectedDevice = device;
           });
-          break; // 找到后就退出循环
+          break; // Exit the loop once the device is found
         }
       }
     });
   }
 
-  /// 连接到选定设备
+  /// Connect to the selected device
   void _connectToDevice() async {
     if (_selectedDevice == null) {
-      // 如果在已绑定设备里没找到目标设备，就提示一下
+      // If we didn't find the target device in the bonded list, show a message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("已绑定设备中未发现 Nano33BLE_Predictor")),
+        const SnackBar(content: Text("Nano33BLE_Predictor not found among bonded devices")),
       );
       return;
     }
 
     setState(() => _isConnecting = true);
     try {
-      // 调用封装好的连接逻辑
+      // Use the connection logic encapsulated in the service
       await _bluetoothService.connectToDevice(_selectedDevice!);
 
-      // 等待最多 5 秒，直到成功订阅特征值
+      // Wait up to 5 seconds, until the characteristic is successfully subscribed
       bool isSubscribed = false;
       await Future.doWhile(() async {
         await Future.delayed(const Duration(milliseconds: 100));
         isSubscribed = _bluetoothService.isSubscribed;
-        return !isSubscribed; // 当 isSubscribed = true 时退出循环
+        return !isSubscribed; // Once isSubscribed = true, exit the loop
       }).timeout(const Duration(seconds: 5));
 
       if (isSubscribed) {
         Navigator.pushNamedAndRemoveUntil(context, "/root_app", (route) => false);
       } else {
-        throw Exception("无法订阅特征值，请检查设备服务");
+        throw Exception("Failed to subscribe to the characteristic, please check the device service");
       }
     } on TimeoutException {
       showDialog(
         context: context,
         builder: (ctx) => const AlertDialog(
-          title: Text("连接超时"),
-          content: Text("无法在指定时间内订阅数据通道"),
+          title: Text("Connection Timeout"),
+          content: Text("Could not subscribe to the data channel within the specified time"),
         ),
       );
     } finally {
@@ -223,72 +222,79 @@ class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
     final isConnected = _connectionState == myService.ConnectionState.connected;
     final isConnecting = _connectionState == myService.ConnectionState.connecting;
 
-    // 根据状态显示不同的文字
+    // Display different text based on connection state
     String statusText;
     if (isConnected) {
-      statusText = "已连接 Mini HAR";
+      statusText = "Connected to Mini HAR";
     } else if (isConnecting) {
-      statusText = "连接中...";
+      statusText = "Connecting...";
     } else {
-      statusText = "未连接 Mini HAR";
+      statusText = "Not connected with Mini HAR.";
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("蓝牙连接"),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            // 显示连接状态
-            Text(
-              statusText,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: isConnected ? Colors.green : Colors.black,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            const Text(
-              "确认设备电源开启，已在系统中绑定，点击下方按钮连接。",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const Spacer(),
-
-            // “连接”按钮
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                onPressed: (isConnecting || isConnected) ? null : _connectToDevice,
-                child: _isConnecting
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                  '连接',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+      // appBar: AppBar(
+      //   title: const Text("Bluetooth Connection"),
+      //   backgroundColor: Colors.white,
+      //   elevation: 0,
+      //   iconTheme: const IconThemeData(color: Colors.black),
+      // ),
+      appBar: null,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              // 使用 Expanded 包裹一个 Column，让文本整体居中
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      statusText,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: isConnected ? Colors.green : Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Make sure the device is powered on and paired in the system. Click the button below to connect.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
-          ],
+
+              // 按钮放在最下方
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  // 自定义圆角弧度，比如 12
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: (isConnecting || isConnected) ? null : _connectToDevice,
+                  child: _isConnecting
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                    'Connect',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -296,7 +302,7 @@ class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
 
   @override
   void dispose() {
-    // 取消订阅，防止内存泄漏
+    // Cancel subscriptions to prevent memory leaks
     _connectionSubscription.cancel();
     _bondedSubscription?.cancel();
     super.dispose();

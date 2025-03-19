@@ -7,6 +7,8 @@ import 'package:fitness_ui_kit/widget/chart_sleep.dart';
 import 'package:fitness_ui_kit/widget/chart_workout_progress.dart';
 import 'package:fitness_ui_kit/widget/water_intake_progressbar.dart';
 import 'package:fitness_ui_kit/widget/water_intake_timeline.dart';
+import '../pages/activity_display_widget.dart';
+import '../services/bluetooth_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
@@ -18,11 +20,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final BluetoothService _bluetoothService = BluetoothService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: getBody(),
     );
+  }
+
+  @override
+  void dispose() {
+    _bluetoothService.dispose(); // 确保释放资源
+    super.dispose();
   }
 
   Widget getBody() {
@@ -68,9 +78,13 @@ class _HomePageState extends State<HomePage> {
                   )
                 ],
               ),
+              // 新增活动组件
               SizedBox(
                 height: 30,
               ),
+              ActivityDisplayWidget(bluetoothService: _bluetoothService),
+              SizedBox(height: 20),
+
               Container(
                 width: double.infinity,
                 height: 145,

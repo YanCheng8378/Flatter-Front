@@ -32,7 +32,7 @@ class _RootAppState extends State<RootApp> {
       index: pageIndex,
       children: [
         HomePage(),
-        DataDisplayPage(),
+        // DataDisplayPage(),
         DataChartPage(),
         // BluetoothDevicesPage(),
         Center(child: Text("Profile")),
@@ -43,7 +43,7 @@ class _RootAppState extends State<RootApp> {
   Widget getFooter() {
     List items = [
       LineIcons.home,
-      Icons.data_usage,
+      // Icons.data_usage,
       LineIcons.pieChart,
       // Icons.bluetooth,
       LineIcons.user

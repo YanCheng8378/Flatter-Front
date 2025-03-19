@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fb;
+import 'dart:typed_data';
 
 enum ConnectionState {
   disconnected,
@@ -47,6 +48,13 @@ class BluetoothService {
 
   bool _isPredictionSubscribed = false;
   bool _isSensorSubscribed = false;
+
+  // 在 BluetoothService 类中添加
+  Stream<bool> get connectionStream =>
+      connectionStateStream.map((state) => state == ConnectionState.connected);
+
+  Stream<String> get predictionDataStringStream =>
+      predictionDataStream.map((data) => utf8.decode(data));
 
   // 添加一个综合订阅状态
   bool get isSubscribed => _isPredictionSubscribed && _isSensorSubscribed;
@@ -179,6 +187,30 @@ class BluetoothService {
       _isSensorSubscribed = false;
     }
   }
+  // void monitorCharacteristic(
+  //     fb.BluetoothCharacteristic characteristic,
+  //     StreamController<List<int>> controller) async {
+  //   try {
+  //     if (characteristic.properties.notify) {
+  //       await characteristic.setNotifyValue(true);
+  //
+  //       // 添加订阅状态通知
+  //       if (characteristic == _predictionCharacteristic) {
+  //         _isPredictionSubscribed = true;
+  //         _connectionStateController.add(ConnectionState.connected);
+  //       }
+  //
+  //       characteristic.lastValueStream.listen(
+  //           controller.add,
+  //           onError: (e) => print("数据流错误: $e"),
+  //           cancelOnError: true
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print("订阅失败: $e");
+  //     _connectionStateController.add(ConnectionState.disconnected);
+  //   }
+  // }
 
   /// Disconnects from the connected device.
   Future<void> disconnectDevice() async {
@@ -191,6 +223,32 @@ class BluetoothService {
     }
   }
 
+  static String parsePredictionData(List<int> data) {
+    try {
+      if (data.length >= 8) {
+        final byteData = ByteData.sublistView(Uint8List.fromList(data));
+        final prediction = byteData.getInt32(4, Endian.little);
+        return _mapPredictionCode(prediction);
+      }
+      return "Invalid Data";
+    } catch (e) {
+      return "Parse Error";
+    }
+  }
+
+  static String _mapPredictionCode(int code) {
+    const map = {
+      0: "Cycling",
+      1: "WalkDownstairs",
+      2: "Jogging",
+      3: "Lying",
+      4: "Sitting",
+      5: "WalkUpstairs",
+      6: "Walking"
+    };
+    return map[code] ?? "Unknown Activity";
+  }
+
   void stopScan() {
     fb.FlutterBluePlus.stopScan();
   }
@@ -200,5 +258,7 @@ class BluetoothService {
     _scanResultsController.close();
     _predictionDataController.close();
     _sensorDataController.close();
+    _connectionStateController.close(); // 新增关闭连接状态控制器
+    _connectedDevice?.disconnect();
   }
 }
