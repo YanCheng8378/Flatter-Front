@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 import 'dart:typed_data';
@@ -37,23 +38,24 @@ class _HomePageState extends State<HomePage> {
   bool? _isExerciseMatched;
 
   // 新增：系统原始判断结果和整体计数
+  String _activity = "No device connected";
   bool _detectedExercise = true; // 模拟系统原始判断结果
   int _correctCount = 0;
   int _incorrectCount = 0;
 
   // 新增：7种动作配置（实际项目中可通过外部配置导入）
   final List<String> _actions = [
-    "Running",
-    "Walking",
     "Cycling",
-    "Yoga",
-    "Strength",
-    "Cardio",
-    "Rest"
+    "WalkDownstairs",
+    "Jogging",
+    "Lying",
+    "Sitting",
+    "WalkUpstairs",
+    "Walking"
   ];
 
-  // 当前系统预测的动作（示例中初始默认 "Running"，但在点击时会更新为随机动作）
-  String _currentPredictedAction = "Running";
+  // 当前系统预测的动作（示例中初始默认 "Sitting"，但在点击时会更新为随机动作）
+  String _currentPredictedAction = "Sitting";
 
   // 分别记录每种动作的正确与错误次数
   late Map<String, int> _actionCorrectCount;
@@ -68,6 +70,7 @@ class _HomePageState extends State<HomePage> {
     _actionCorrectCount = { for (var a in _actions) a: 0 };
     _actionIncorrectCount = { for (var a in _actions) a: 0 };
 
+    _setupActivityListeners();
     _setupSensorListener();
   }
 
@@ -84,6 +87,16 @@ class _HomePageState extends State<HomePage> {
     _sensorSub.cancel();
     _chartTimer?.cancel();
     super.dispose();
+  }
+
+  void _setupActivityListeners() {
+    // 监听预测数据流
+    _bluetoothService.predictionDataStringStream.listen((dataStr) {
+      final parsed = BluetoothService.parsePredictionData(utf8.encode(dataStr));
+      if (parsed != _activity) {
+        setState(() => _activity = parsed);
+      }
+    });
   }
 
   void _setupSensorListener() {
@@ -295,8 +308,7 @@ class _HomePageState extends State<HomePage> {
   // ===============================
   void _onYesPressed() {
     setState(() {
-      // 模拟随机获取当前预测动作（实际中应由算法获得）
-      _currentPredictedAction = _actions[Random().nextInt(_actions.length)];
+      _currentPredictedAction = _activity;
       _isExerciseMatched = true;
       if (_detectedExercise == true) {
         _correctCount++;
@@ -313,7 +325,7 @@ class _HomePageState extends State<HomePage> {
   void _onNoPressed() {
     setState(() {
       // 模拟随机获取当前预测动作（实际中应由算法获得）
-      _currentPredictedAction = _actions[Random().nextInt(_actions.length)];
+      _currentPredictedAction = _activity;
       _isExerciseMatched = false;
       if (_detectedExercise == false) {
         _correctCount++;
