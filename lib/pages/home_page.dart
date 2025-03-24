@@ -34,16 +34,16 @@ class _HomePageState extends State<HomePage> {
   Timer? _chartTimer;
   int _startTime = 0;
 
-  // 原有：用于记录用户确认状态
+  // 用于记录用户确认状态
   bool? _isExerciseMatched;
 
-  // 新增：系统原始判断结果和整体计数
+  // 系统原始判断结果和整体计数
   String _activity = "No device connected";
   bool _detectedExercise = true; // 模拟系统原始判断结果
   int _correctCount = 0;
   int _incorrectCount = 0;
 
-  // 新增：7种动作配置（实际项目中可通过外部配置导入）
+  // 7种动作配置（实际项目中可通过外部配置导入）
   final List<String> _actions = [
     "Cycling",
     "WalkDownstairs",
@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
     "Walking"
   ];
 
-  // 当前系统预测的动作（示例中初始默认 "Sitting"，但在点击时会更新为随机动作）
+  // 当前系统预测的动作（示例中初始默认 "Sitting"）
   String _currentPredictedAction = "Sitting";
 
   // 分别记录每种动作的正确与错误次数
@@ -77,6 +77,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: white, // 设置整体界面背景色
       body: getBody(),
     );
   }
@@ -134,8 +135,6 @@ class _HomePageState extends State<HomePage> {
           _trimData(_gravityX, _gravityY, _gravityZ);
           _trimData(_linearX, _linearY, _linearZ);
           _trimData(_gyroX, _gyroY, _gyroZ);
-
-          // TODO: 根据传感器数据更新 _currentPredictedAction（此处示例不做处理）
         });
       }
     });
@@ -148,163 +147,8 @@ class _HomePageState extends State<HomePage> {
     while (z.length > maxPoints) z.removeAt(0);
   }
 
-  Widget _buildSensorChart(
-      String title,
-      List<FlSpot> x,
-      List<FlSpot> y,
-      List<FlSpot> z, {
-        required double minY,
-        required double maxY,
-        double width = double.infinity,
-      }) {
-    return Container(
-      width: width,
-      height: 220,
-      margin: const EdgeInsets.only(right: 20),
-      decoration: BoxDecoration(
-        color: white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: black.withOpacity(0.05),
-            spreadRadius: 5,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 标题 & 图例
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: black,
-                  ),
-                ),
-                Row(
-                  children: [
-                    _buildChartLegend("X", Colors.redAccent),
-                    const SizedBox(width: 12),
-                    _buildChartLegend("Y", Colors.green),
-                    const SizedBox(width: 12),
-                    _buildChartLegend("Z", Colors.blue),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: LineChart(
-                LineChartData(
-                  minY: minY,
-                  maxY: maxY,
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: false,
-                    horizontalInterval: _getInterval(maxY),
-                    getDrawingHorizontalLine: (value) => FlLine(
-                      color: Colors.grey[200],
-                      strokeWidth: 1,
-                    ),
-                  ),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        interval: _getInterval(maxY),
-                        getTitlesWidget: (value, meta) => Text(
-                          value.toInt().toString(),
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    _buildLineData(x, Colors.redAccent.withOpacity(0.8)),
-                    _buildLineData(y, Colors.green.withOpacity(0.8)),
-                    _buildLineData(z, Colors.blue.withOpacity(0.8)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChartLegend(String text, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(3),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
-    );
-  }
-
-  double _getInterval(double max) {
-    if (max <= 5) return 1;
-    if (max <= 20) return 5;
-    return 10;
-  }
-
-  LineChartBarData _buildLineData(List<FlSpot> spots, Color color) {
-    return LineChartBarData(
-      spots: spots,
-      isCurved: true,
-      color: color,
-      barWidth: 2,
-      shadow: Shadow(
-        color: color.withOpacity(0.2),
-        blurRadius: 8,
-        offset: const Offset(0, 4),
-      ),
-      belowBarData: BarAreaData(
-        show: true,
-        color: color.withOpacity(0.1),
-      ),
-      dotData: FlDotData(show: false),
-    );
-  }
-
   // ===============================
-  // 点击 Yes/No 时更新统计，同时记录当前预测动作（此处模拟随机选择）
+  // 点击 Yes/No 时更新统计，同时记录当前预测动作
   // ===============================
   void _onYesPressed() {
     setState(() {
@@ -324,7 +168,6 @@ class _HomePageState extends State<HomePage> {
 
   void _onNoPressed() {
     setState(() {
-      // 模拟随机获取当前预测动作（实际中应由算法获得）
       _currentPredictedAction = _activity;
       _isExerciseMatched = false;
       if (_detectedExercise == false) {
@@ -385,8 +228,7 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 20), // 调整左右间距
-
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
           title: const Text("Detection accuracy of each action"),
           content: SizedBox(
             width: double.maxFinite,
@@ -423,8 +265,7 @@ class _HomePageState extends State<HomePage> {
                 toY: accuracy,
                 width: 15,
                 borderRadius: BorderRadius.circular(0),
-                color: Colors.purple.shade200,
-
+                color: Colors.blue.shade900,
               ),
             ],
           );
@@ -434,14 +275,18 @@ class _HomePageState extends State<HomePage> {
             sideTitles: SideTitles(
               showTitles: true,
               interval: 1,
+              reservedSize: 60,
               getTitlesWidget: (double value, TitleMeta meta) {
                 final int index = value.toInt();
                 if (index >= 0 && index < _actions.length) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      _actions[index],
-                      style: const TextStyle(fontSize: 10),
+                    child: RotatedBox(
+                      quarterTurns: 1,
+                      child: Text(
+                        _actions[index],
+                        style: const TextStyle(fontSize: 10),
+                      ),
                     ),
                   );
                 }
@@ -477,7 +322,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
   Widget _buildClickableAccuracyPieChart() {
     return GestureDetector(
       onTap: _showActionAccuracyDialog,
@@ -489,17 +333,18 @@ class _HomePageState extends State<HomePage> {
     return Stack(
       children: [
         Container(
+          margin: const EdgeInsets.only(top: 20),
           width: double.infinity,
-          height: 300,
+          height: 330,
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [secondary, primary]),
+            color: white,
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: black.withOpacity(0.01),
-                spreadRadius: 20,
-                blurRadius: 10,
-                offset: const Offset(0, 10),
+                color: Colors.grey.withOpacity(0.4),
+                spreadRadius: 4,
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -517,12 +362,18 @@ class _HomePageState extends State<HomePage> {
         ),
         Positioned(
           left: 20,
-          top: 20,
+          top: 40,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Detection accuracy",
-                  style: TextStyle(fontSize: 12, color: Colors.black)),
+              Text(
+                "Detection accuracy",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -531,12 +382,16 @@ class _HomePageState extends State<HomePage> {
                     height: 12,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                          colors: [Colors.red.shade300, Colors.red.shade700]),
+                        colors: [Colors.red.shade300, Colors.red.shade700],
+                      ),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
                   const SizedBox(width: 5),
-                  Text("Correct", style: TextStyle(fontSize: 12, color: white)),
+                  Text(
+                    "Correct",
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -547,18 +402,173 @@ class _HomePageState extends State<HomePage> {
                     height: 12,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                          colors: [Colors.green.shade300, Colors.green.shade700]),
+                        colors: [Colors.green.shade300, Colors.green.shade700],
+                      ),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
                   const SizedBox(width: 5),
-                  Text("Incorrect", style: TextStyle(fontSize: 12, color: white)),
+                  Text(
+                    "Incorrect",
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                 ],
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSensorChart(
+      String title,
+      List<FlSpot> x,
+      List<FlSpot> y,
+      List<FlSpot> z, {
+        required double minY,
+        required double maxY,
+        double width = double.infinity,
+      }) {
+    return Container(
+      width: width,
+      height: 220,
+      margin: const EdgeInsets.only(right: 20),
+      decoration: BoxDecoration(
+        color: white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 标题 & 图例
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: black,
+                  ),
+                ),
+                Row(
+                  children: [
+                    _buildChartLegend("X", Colors.redAccent.shade100),
+                    const SizedBox(width: 12),
+                    _buildChartLegend("Y", Colors.green.shade100),
+                    const SizedBox(width: 12),
+                    _buildChartLegend("Z", Colors.blue.shade100),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: LineChart(
+                LineChartData(
+                  minY: minY,
+                  maxY: maxY,
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: _getInterval(maxY),
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: Colors.grey[200],
+                      strokeWidth: 1,
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: _getInterval(maxY),
+                        getTitlesWidget: (value, meta) => Text(
+                          value.toInt().toString(),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    _buildLineData(
+                      x,
+                      Colors.redAccent.shade100.withOpacity(0.8),
+                    ),
+                    _buildLineData(
+                      y,
+                      Colors.green.shade100.withOpacity(0.8),
+                    ),
+                    _buildLineData(
+                      z,
+                      Colors.blue.shade100.withOpacity(0.8),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChartLegend(String text, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[800],
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _getInterval(double max) {
+    if (max <= 5) return 1;
+    if (max <= 20) return 5;
+    return 10;
+  }
+
+  LineChartBarData _buildLineData(List<FlSpot> spots, Color color) {
+    return LineChartBarData(
+      spots: spots,
+      isCurved: true,
+      color: color,
+      barWidth: 2,
+      belowBarData: BarAreaData(
+        show: true,
+        color: color.withOpacity(0.1),
+      ),
+      dotData: FlDotData(show: false),
     );
   }
 
@@ -603,72 +613,102 @@ class _HomePageState extends State<HomePage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Center(
-                      child: Icon(LineIcons.bell),
-                    ),
+                      child: Icon(
+                        Icons.directions_run, // Material Icon 中的奔跑小人图标
+                        size: 28,
+                        color: Colors.black,
+                      ),                    ),
                   )
                 ],
               ),
               const SizedBox(height: 30),
 
-              // 活动组件
-              ActivityDisplayWidget(bluetoothService: _bluetoothService),
-              const SizedBox(height: 10),
+              // ===== 在同一个容器里包含：ActivityDisplayWidget 和 Yes/No 按钮 (竖向布局) =====
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      spreadRadius: 5,
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 预测动作组件（显示 "CURRENT ACTIVITY", "No device connected" 等）
+                    ActivityDisplayWidget(bluetoothService: _bluetoothService),
 
-              // Yes/No 按钮，调用新方法记录当前预测动作
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: _onYesPressed,
-                    child: Container(
-                      width: 70,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [secondary, primary]),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primary.withOpacity(0.3),
-                            offset: const Offset(0, 3),
-                            blurRadius: 5,
+                    const SizedBox(height: 10),
+
+                    // Yes/No 按钮：保持原先的横向结构
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Yes 按钮
+                        InkWell(
+                          onTap: _onYesPressed,
+                          child: Container(
+                            width: 130,
+                            height: 45,
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  offset: const Offset(0, 3),
+                                  blurRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Text(
+                                "Yes",
+                                style: TextStyle(fontSize: 13, color: Colors.white),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "Yes",
-                          style: TextStyle(fontSize: 13, color: Colors.white),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  InkWell(
-                    onTap: _onNoPressed,
-                    child: Container(
-                      width: 70,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [secondary, primary]),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primary.withOpacity(0.3),
-                            offset: const Offset(0, 3),
-                            blurRadius: 5,
+                        const SizedBox(width: 20),
+                        // No 按钮
+                        InkWell(
+                          onTap: _onNoPressed,
+                          child: Container(
+                            width: 130,
+                            height: 45,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  offset: const Offset(0, 3),
+                                  blurRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Text(
+                                "No",
+                                style: TextStyle(fontSize: 13, color: Colors.black),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "No",
-                          style: TextStyle(fontSize: 13, color: Colors.white),
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              // ===== 以上容器使得「预测动作」和「Yes/No」都在一个框里 =====
+
               const SizedBox(height: 20),
 
               // 饼图（点击后显示 7 种动作的准确率）
@@ -676,7 +716,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 20),
 
               // 实时监测模块：使用 PageView 实现横向滑动
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.only(left: 0),
                 child: SizedBox(

@@ -23,7 +23,7 @@ class _RootAppState extends State<RootApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: getBody(),
-      bottomNavigationBar: getFooter(),
+      // bottomNavigationBar: getFooter(),
     );
   }
 
