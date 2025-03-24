@@ -33,9 +33,9 @@ class _RootAppState extends State<RootApp> {
       children: [
         HomePage(),
         // DataDisplayPage(),
-        DataChartPage(),
-        // BluetoothDevicesPage(),
-        Center(child: Text("Profile")),
+        // DataChartPage(),
+        // // BluetoothDevicesPage(),
+        // Center(child: Text("Profile")),
       ],
     );
   }
@@ -44,9 +44,9 @@ class _RootAppState extends State<RootApp> {
     List items = [
       LineIcons.home,
       // Icons.data_usage,
-      LineIcons.pieChart,
-      // Icons.bluetooth,
-      LineIcons.user
+      // LineIcons.pieChart,
+      // // Icons.bluetooth,
+      // LineIcons.user
     ];
     return Container(
       height: 90,

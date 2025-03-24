@@ -176,6 +176,14 @@ class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
     });
   }
 
+  void _getAndConnect() async {
+    // Get bonded devices
+    await _bluetoothService.getBondedDevices();
+    await Future.delayed(const Duration(seconds: 1));
+    // Proceed with connection
+    _connectToDevice();
+  }
+
   /// Connect to the selected device
   void _connectToDevice() async {
     if (_selectedDevice == null) {
@@ -280,7 +288,7 @@ class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: (isConnecting || isConnected) ? null : _connectToDevice,
+                  onPressed: (isConnecting || isConnected) ? null : _getAndConnect,
                   child: _isConnecting
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
