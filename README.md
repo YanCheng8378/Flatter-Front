@@ -1,21 +1,22 @@
-# Fitness Tracking App UI
+# Team 43
 
-- [Support me on Patreon](https://www.patreon.com/sopheamenvan?fan_landing=true)
-- [Watch on Youtube](https://youtu.be/ju9kE_Kvwtg)
+This project is a cross-platform mobile application developed based on Flutter, which obtains users' movement data in real time by connecting single chip microcomputer, and uses machine learning algorithm to predict and classify users' movement types, so as to help users better understand their own motion state.
 
-![App UI](https://user-images.githubusercontent.com/16510597/147915288-c4fa25b9-ab15-4225-9d16-5598b70f3da7.png)
+## Team Members
 
-A new Flutter project.
+Xin Zhe Lee - xzl209@student.bham.ac.uk (2482509)
+Haoyuan Wang - hxw146@student.bham.ac.uk (2458441)
+Taian Peng - txp214@student.bham.ac.uk (2326014)
+Caiyang Li - cxl284@student.bham.ac.uk (2458438)
 
-## Getting Started
+## Technology Stack
 
-This project is a starting point for a Flutter application.
+Flutter 3.x
 
-A few resources to get you started if this is your first Flutter project:
+Dart
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+CNN (Machine Learning Inference)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Arduino BLE Nano33 for data acquisition and transmission
+
+
