@@ -16,7 +16,7 @@ class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
   // The default target device name you want to connect to
   static const String _targetDeviceName = "Nano33BLE_Predictor";
 
-  fb.BluetoothDevice? _selectedDevice;  // The bonded device if found
+  fb.BluetoothDevice? _selectedDevice; // The bonded device if found
   bool _isConnecting = false;
   myService.ConnectionState _connectionState = myService.ConnectionState.disconnected;
 
@@ -122,7 +122,7 @@ class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              // 使用 Expanded 包裹一个 Column，让文本整体居中
+              // Wrap the Column in an Expanded widget to center the text overall
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -145,12 +145,12 @@ class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
                 ),
               ),
 
-              // 按钮放在最下方
+              // Place the button at the bottom
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  // 自定义圆角弧度，比如 12
+                  // Custom round corner radius, for example 12
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
@@ -185,3 +185,4 @@ class _BluetoothDevicesPageState extends State<BluetoothDevicesPage> {
     super.dispose();
   }
 }
+

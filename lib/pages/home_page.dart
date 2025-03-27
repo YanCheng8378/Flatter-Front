@@ -26,16 +26,16 @@ class _HomePageState extends State<HomePage> {
   Timer? _chartTimer;
   int _startTime = 0;
 
-  // 用于记录用户确认状态
+  // Used to record the user's confirmation status
   bool? _isExerciseMatched;
 
-  // 系统原始判断结果和整体计数
+  // Original system prediction result and overall count
   String _activity = "No device connected";
-  bool _detectedExercise = true; // 模拟系统原始判断结果
+  bool _detectedExercise = true; // Simulated original system prediction result
   int _correctCount = 0;
   int _incorrectCount = 0;
 
-  // 7种动作配置（实际项目中可通过外部配置导入）
+  // Configuration for 7 actions (in a real project, these can be imported via external configuration)
   final List<String> _actions = [
     "Cycling",
     "WalkDownstairs",
@@ -46,10 +46,10 @@ class _HomePageState extends State<HomePage> {
     "Walking"
   ];
 
-  // 当前系统预测的动作（示例中初始默认 "Sitting"）
+  // Current predicted action of the system (default is "Sitting" in this example)
   String _currentPredictedAction = "Sitting";
 
-  // 分别记录每种动作的正确与错误次数
+  // Record correct and incorrect counts for each action separately
   late Map<String, int> _actionCorrectCount;
   late Map<String, int> _actionIncorrectCount;
 
@@ -58,9 +58,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _startTime = DateTime.now().millisecondsSinceEpoch;
 
-    // 初始化各动作计数 Map
-    _actionCorrectCount = { for (var a in _actions) a: 0 };
-    _actionIncorrectCount = { for (var a in _actions) a: 0 };
+    // Initialize count maps for each action
+    _actionCorrectCount = {for (var a in _actions) a: 0};
+    _actionIncorrectCount = {for (var a in _actions) a: 0};
 
     _setupActivityListeners();
     _setupSensorListener();
@@ -69,21 +69,21 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: white, // 设置整体界面背景色
+      backgroundColor: white, // Set overall background color
       body: getBody(),
     );
   }
 
   @override
   void dispose() {
-    _bluetoothService.dispose(); // 确保释放资源
+    _bluetoothService.dispose(); // Ensure resources are released
     _sensorSub.cancel();
     _chartTimer?.cancel();
     super.dispose();
   }
 
   void _setupActivityListeners() {
-    // 监听预测数据流
+    // Listen to the prediction data stream
     _bluetoothService.predictionDataStringStream.listen((dataStr) {
       final parsed = BluetoothService.parsePredictionData(utf8.encode(dataStr));
       if (parsed != _activity) {
@@ -102,27 +102,27 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _latestElapsedTime = elapsed;
 
-          // 加速度数据
+          // Acceleration data
           _accX.add(FlSpot(elapsed, byteData.getFloat32(4, Endian.little)));
           _accY.add(FlSpot(elapsed, byteData.getFloat32(8, Endian.little)));
           _accZ.add(FlSpot(elapsed, byteData.getFloat32(12, Endian.little)));
 
-          // 重力数据
+          // Gravity data
           _gravityX.add(FlSpot(elapsed, byteData.getFloat32(16, Endian.little)));
           _gravityY.add(FlSpot(elapsed, byteData.getFloat32(20, Endian.little)));
           _gravityZ.add(FlSpot(elapsed, byteData.getFloat32(24, Endian.little)));
 
-          // 线性加速度
+          // Linear acceleration
           _linearX.add(FlSpot(elapsed, byteData.getFloat32(28, Endian.little)));
           _linearY.add(FlSpot(elapsed, byteData.getFloat32(32, Endian.little)));
           _linearZ.add(FlSpot(elapsed, byteData.getFloat32(36, Endian.little)));
 
-          // 陀螺仪
+          // Gyroscope data
           _gyroX.add(FlSpot(elapsed, byteData.getFloat32(40, Endian.little)));
           _gyroY.add(FlSpot(elapsed, byteData.getFloat32(44, Endian.little)));
           _gyroZ.add(FlSpot(elapsed, byteData.getFloat32(48, Endian.little)));
 
-          // 保持数据长度
+          // Maintain data length
           _trimData(_accX, _accY, _accZ);
           _trimData(_gravityX, _gravityY, _gravityZ);
           _trimData(_linearX, _linearY, _linearZ);
@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ===============================
-  // 点击 Yes/No 时更新统计，同时记录当前预测动作
+  // Update statistics and record the current predicted action when Yes/No is clicked
   // ===============================
   void _onYesPressed() {
     setState(() {
@@ -175,7 +175,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ===============================
-  // 构建饼图（显示整体正确率），点击后显示 7 种动作的预测准确度
+  // Build the pie chart (display overall accuracy); clicking it shows the prediction accuracy for 7 actions
   // ===============================
   List<PieChartSectionData> _buildPieChartSections() {
     int total = _correctCount + _incorrectCount;
@@ -248,7 +248,7 @@ class _HomePageState extends State<HomePage> {
           int correct = _actionCorrectCount[action] ?? 0;
           int incorrect = _actionIncorrectCount[action] ?? 0;
           int total = correct + incorrect;
-          // 如果没有数据，则显示为 0%
+          // If there is no data, show 0%
           double accuracy = total > 0 ? (correct / total * 100) : 0;
           return BarChartGroupData(
             x: index,
@@ -374,8 +374,7 @@ class _HomePageState extends State<HomePage> {
                     height: 12,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.green.shade300, Colors.green.shade700]
-                      ),
+                          colors: [Colors.green.shade300, Colors.green.shade700]),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -435,7 +434,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 标题 & 图例
+            // Title & legend
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -575,7 +574,7 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 欢迎区域
+              // Welcome section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -606,16 +605,17 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: const Center(
                       child: Icon(
-                        Icons.directions_run, // Material Icon 中的奔跑小人图标
+                        Icons.directions_run, // Running person icon from Material Icons
                         size: 28,
                         color: Colors.black,
-                      ),                    ),
+                      ),
+                    ),
                   )
                 ],
               ),
               const SizedBox(height: 30),
 
-              // ===== 在同一个容器里包含：ActivityDisplayWidget 和 Yes/No 按钮 (竖向布局) =====
+              // ===== Container that includes ActivityDisplayWidget and Yes/No buttons (vertical layout) =====
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -633,16 +633,16 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 预测动作组件（显示 "CURRENT ACTIVITY", "No device connected" 等）
+                    // Prediction action widget (displays "CURRENT ACTIVITY", "No device connected", etc.)
                     ActivityDisplayWidget(bluetoothService: _bluetoothService),
 
                     const SizedBox(height: 10),
 
-                    // Yes/No 按钮：保持原先的横向结构
+                    // Yes/No buttons: maintain the original horizontal structure
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Yes 按钮
+                        // Yes button
                         InkWell(
                           onTap: _onYesPressed,
                           child: Container(
@@ -668,7 +668,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        // No 按钮
+                        // No button
                         InkWell(
                           onTap: _onNoPressed,
                           child: Container(
@@ -699,15 +699,15 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              // ===== 以上容器使得「预测动作」和「Yes/No」都在一个框里 =====
+              // ===== The above container ensures that "Prediction action" and "Yes/No" are in the same box =====
 
               const SizedBox(height: 20),
 
-              // 饼图（点击后显示 7 种动作的准确率）
+              // Pie chart (click to show the accuracy of the 7 actions)
               Center(child: _buildClickableAccuracyPieChart()),
               const SizedBox(height: 20),
 
-              // 实时监测模块：使用 PageView 实现横向滑动
+              // Real-time monitoring module: use PageView for horizontal swiping
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.only(left: 0),

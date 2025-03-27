@@ -21,7 +21,7 @@ class BluetoothService {
   fb.BluetoothCharacteristic? _predictionCharacteristic;
   fb.BluetoothCharacteristic? _sensorCharacteristic;
 
-  // Create separate StreamControllers if you want to handle the data separately.
+  // Create separate StreamControllers to handle the data separately.
   final StreamController<List<fb.BluetoothDevice>> _bondedDevicesController =
   StreamController<List<fb.BluetoothDevice>>.broadcast();
   final StreamController<List<fb.ScanResult>> _scanResultsController =
@@ -48,14 +48,14 @@ class BluetoothService {
   bool _isPredictionSubscribed = false;
   bool _isSensorSubscribed = false;
 
-  // 在 BluetoothService 类中添加
+  // Added in the BluetoothService class
   Stream<bool> get connectionStream =>
       connectionStateStream.map((state) => state == ConnectionState.connected);
 
   Stream<String> get predictionDataStringStream =>
       predictionDataStream.map((data) => utf8.decode(data));
 
-  // 添加一个综合订阅状态
+  // Combined subscription status
   bool get isSubscribed => _isPredictionSubscribed && _isSensorSubscribed;
 
   /// Initializes Bluetooth service.
@@ -101,7 +101,7 @@ class BluetoothService {
       discoverServices(device);
     } catch (e) {
       _connectionStateController.add(ConnectionState.disconnected);
-      print("连接失败: $e");
+      print("Connection failed: $e");
     }
   }
 
@@ -149,7 +149,7 @@ class BluetoothService {
       if (characteristic.properties.notify) {
         await characteristic.setNotifyValue(true);
 
-        // 根据特征值类型更新订阅状态
+        // Update subscription status based on the characteristic type
         if (characteristic == _predictionCharacteristic) {
           _isPredictionSubscribed = true;
         } else if (characteristic == _sensorCharacteristic) {
@@ -161,8 +161,8 @@ class BluetoothService {
         });
       }
     } catch (e) {
-      print("订阅特征值失败: $e");
-      // 重置订阅状态（可选）
+      print("Failed to subscribe to characteristic: $e");
+      // Reset subscription status (optional)
       _isPredictionSubscribed = false;
       _isSensorSubscribed = false;
     }
@@ -214,7 +214,7 @@ class BluetoothService {
     _scanResultsController.close();
     _predictionDataController.close();
     _sensorDataController.close();
-    _connectionStateController.close(); // 新增关闭连接状态控制器
+    _connectionStateController.close(); // Also close connection state controller
     _connectedDevice?.disconnect();
   }
 }

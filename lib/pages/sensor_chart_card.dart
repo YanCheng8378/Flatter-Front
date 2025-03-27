@@ -29,45 +29,49 @@ class SensorChartCard extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(12),
         child: Column(
-            children: [
-            Text(title, style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[700]
-        )),
-        SizedBox(height: 8),
-        SizedBox(
-          height: 120,
-          child: LineChart(
-            LineChartData(
-              minX: latestTime > 30 ? latestTime - 30 : 0,
-              maxX: latestTime + 1,
-              minY: minY,
-              maxY: maxY,
-              // 保持原有图表配置，调整颜色匹配首页主题
-              lineBarsData: [
-                _buildLineData(dataX, Colors.red),
-                _buildLineData(dataY, Colors.green),
-                _buildLineData(dataZ, Colors.blue),
-              ],
-              gridData: FlGridData(show: false),
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, _) => Text(
-                        '${value.toInt()}s',
-                        style: TextStyle(fontSize: 10, color: Colors.grey),
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
+              ),
+            ),
+            SizedBox(height: 8),
+            SizedBox(
+              height: 120,
+              child: LineChart(
+                LineChartData(
+                  minX: latestTime > 30 ? latestTime - 30 : 0,
+                  maxX: latestTime + 1,
+                  minY: minY,
+                  maxY: maxY,
+                  // Retain the existing chart configuration and adjust colors to match the homepage theme
+                  lineBarsData: [
+                    _buildLineData(dataX, Colors.red),
+                    _buildLineData(dataY, Colors.green),
+                    _buildLineData(dataZ, Colors.blue),
+                  ],
+                  gridData: FlGridData(show: false),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, _) => Text(
+                          '${value.toInt()}s',
+                          style: TextStyle(fontSize: 10, color: Colors.grey),
+                        ),
+                        interval: 10,
                       ),
-                      interval: 10
+                    ),
+                    leftTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   ),
-                ),
-                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );

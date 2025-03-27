@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
 import '../services/bluetooth_service.dart';
 
 class ActivityDisplayWidget extends StatefulWidget {
@@ -22,7 +21,7 @@ class _ActivityDisplayWidgetState extends State<ActivityDisplayWidget> {
   }
 
   void _setupListeners() {
-    // 监听连接状态
+    // Listen to connection status
     widget.bluetoothService.connectionStream.listen((connected) {
       setState(() {
         _isConnected = connected;
@@ -30,7 +29,7 @@ class _ActivityDisplayWidgetState extends State<ActivityDisplayWidget> {
       });
     });
 
-    // 监听预测数据流
+    // Listen to the prediction data stream
     widget.bluetoothService.predictionDataStringStream.listen((dataStr) {
       final parsed = BluetoothService.parsePredictionData(utf8.encode(dataStr));
       if (parsed != _activity) {
@@ -73,7 +72,7 @@ class _ActivityDisplayWidgetState extends State<ActivityDisplayWidget> {
       ),
       child: Row(
         children: [
-          // 连接状态指示器
+          // Connection status indicator
           Container(
             width: 8,
             height: 8,
