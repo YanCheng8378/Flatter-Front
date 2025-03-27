@@ -53,40 +53,6 @@ class _ActivityDisplayWidgetState extends State<ActivityDisplayWidget> {
     "Error": "assets/gifs/Error.gif",
   };
 
-  String _mapPredictionToActivity(dynamic data) {
-    // Check that the received data is a list of integers.
-    if (data is List<int>) {
-      // Ensure that the data length is at least 8 bytes.
-      if (data.length >= 8) {
-        final byteData = Uint8List.fromList(data).buffer.asByteData();
-        // Read the 32-bit integer starting at index 4 (little-endian).
-        int prediction = byteData.getInt32(4, Endian.little);
-        // Mapping based on your provided dictionary:
-        switch (prediction) {
-          case 0:
-            return "Cycling";
-          case 1:
-            return "WalkDownstairs";
-          case 2:
-            return "Jogging";
-          case 3:
-            return "Lying";
-          case 4:
-            return "Sitting";
-          case 5:
-            return "WalkUpstairs";
-          case 6:
-            return "Walking";
-          default:
-            return "Unknown Activity";
-        }
-      } else {
-        return "loading...";
-      }
-    }
-    return "Error";
-  }
-
   @override
   Widget build(BuildContext context) {
     final gifPath = _activityGifMapping[_activity] ??

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fb;
 import 'dart:typed_data';
 
@@ -93,16 +92,6 @@ class BluetoothService {
   }
 
   /// Connects to a selected device and discovers its services.
-  // Future<void> connectToDevice(fb.BluetoothDevice device) async {
-  //   try {
-  //     await device.connect();
-  //     _connectedDevice = device;
-  //     print("Connected to device: ${device.platformName}");
-  //     discoverServices(device);
-  //   } catch (e) {
-  //     print("Error connecting to device: $e");
-  //   }
-  // }
   Future<void> connectToDevice(fb.BluetoothDevice device) async {
     try {
       _connectionStateController.add(ConnectionState.connecting);
@@ -153,15 +142,6 @@ class BluetoothService {
   }
 
   /// Subscribes to characteristic notifications and directs the data to the provided controller.
-  // void monitorCharacteristic(
-  //     fb.BluetoothCharacteristic characteristic, StreamController<List<int>> controller) async {
-  //   if (characteristic.properties.notify) {
-  //     await characteristic.setNotifyValue(true);
-  //     characteristic.lastValueStream.listen((value) {
-  //       controller.add(value); // Send the received data to the appropriate stream.
-  //     });
-  //   }
-  // }
   void monitorCharacteristic(
       fb.BluetoothCharacteristic characteristic,
       StreamController<List<int>> controller) async {
@@ -187,30 +167,6 @@ class BluetoothService {
       _isSensorSubscribed = false;
     }
   }
-  // void monitorCharacteristic(
-  //     fb.BluetoothCharacteristic characteristic,
-  //     StreamController<List<int>> controller) async {
-  //   try {
-  //     if (characteristic.properties.notify) {
-  //       await characteristic.setNotifyValue(true);
-  //
-  //       // 添加订阅状态通知
-  //       if (characteristic == _predictionCharacteristic) {
-  //         _isPredictionSubscribed = true;
-  //         _connectionStateController.add(ConnectionState.connected);
-  //       }
-  //
-  //       characteristic.lastValueStream.listen(
-  //           controller.add,
-  //           onError: (e) => print("数据流错误: $e"),
-  //           cancelOnError: true
-  //       );
-  //     }
-  //   } catch (e) {
-  //     print("订阅失败: $e");
-  //     _connectionStateController.add(ConnectionState.disconnected);
-  //   }
-  // }
 
   /// Disconnects from the connected device.
   Future<void> disconnectDevice() async {

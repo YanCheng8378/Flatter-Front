@@ -1,21 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:ui';
 import 'dart:typed_data';
 
-import 'package:fitness_ui_kit/data/latest_workout.dart';
 import 'package:fitness_ui_kit/theme/colors.dart';
-import 'package:fitness_ui_kit/widget/chart_activity_status.dart';
-import 'package:fitness_ui_kit/widget/chart_sleep.dart';
-import 'package:fitness_ui_kit/widget/chart_workout_progress.dart';
-import 'package:fitness_ui_kit/widget/water_intake_progressbar.dart';
-import 'package:fitness_ui_kit/widget/water_intake_timeline.dart';
 import '../pages/activity_display_widget.dart';
 import '../services/bluetooth_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:line_icons/line_icons.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -768,8 +760,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-
-              // 其他模块（若有）...
             ],
           ),
         ),

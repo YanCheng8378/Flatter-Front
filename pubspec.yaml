@@ -51,7 +51,6 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/
     - assets/gifs/
   #   - images/a_dot_ham.jpeg
 
@@ -81,8 +80,8 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 flutter_native_splash:
-    color: "000000"  # 注意必须是8位HEX (包含透明度)
-    image: "assets/logo/img.png"  # 确保路径正确
+    color: "000000"
+    image: "web/icons/Icon-192.png"
     android: true
     ios: true
     android_gravity: center

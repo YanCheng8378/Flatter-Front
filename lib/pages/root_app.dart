@@ -2,10 +2,6 @@ import 'package:fitness_ui_kit/pages/home_page.dart';
 import 'package:fitness_ui_kit/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
-import 'home_page.dart';
-
-// 新增的蓝牙和数据展示页面
-import 'bluetooth_devices_page.dart';
 
 class RootApp extends StatefulWidget {
   const RootApp({Key? key}) : super(key: key);
@@ -21,7 +17,6 @@ class _RootAppState extends State<RootApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: getBody(),
-      // bottomNavigationBar: getFooter(),
     );
   }
 
@@ -30,10 +25,6 @@ class _RootAppState extends State<RootApp> {
       index: pageIndex,
       children: [
         HomePage(),
-        // DataDisplayPage(),
-        // DataChartPage(),
-        // // BluetoothDevicesPage(),
-        // Center(child: Text("Profile")),
       ],
     );
   }
@@ -41,10 +32,6 @@ class _RootAppState extends State<RootApp> {
   Widget getFooter() {
     List items = [
       LineIcons.home,
-      // Icons.data_usage,
-      // LineIcons.pieChart,
-      // // Icons.bluetooth,
-      // LineIcons.user
     ];
     return Container(
       height: 90,
